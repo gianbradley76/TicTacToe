@@ -2,6 +2,10 @@ import random
 import sys
 
 
+def change_player(current_player):
+    return 'O' if current_player == 'X' else 'X'
+
+
 def comp_coordinate(final_list, current_player):
     """Generates a coordinate for computer
 
@@ -11,7 +15,6 @@ def comp_coordinate(final_list, current_player):
     """
 
     print('Making move level "easy"')
-    current_player = 'O'
     while True:
         comp_x = random.randint(0, 2)
         comp_y = random.randint(0, 2)
@@ -32,10 +35,8 @@ def enter_coordinates(final_list):
     Args:
         final_list (list ): list of availble coordinates
     """
-
-    current_player = 'X'
     while True:
-        
+
         coordinate_input = input('Enter the coordinates: ').split()
         # Check if input is integer values
         try:
@@ -91,8 +92,9 @@ def game_state(final_list, current_player):
     for condition in winning_conditions:
         if condition[0][0] == condition[1][0] == condition[2][0] and condition[0][0] != ' ' and condition[1][0] != ' ' and condition[2][0] != ' ':
             print(f'{current_player} wins')
-            sys.exit(0)
-            break
+            # sys.exit(0)
+            # break
+            return False
 
     # Print the initial table -> end of the games
     is_draw = True
@@ -108,9 +110,10 @@ def game_state(final_list, current_player):
 
     if is_draw and all_occupied:
         print('Draw')
-        sys.exit(0)
+        # sys.exit(0)
+        return False
     elif is_draw and not all_occupied:
-        print('Game not finished')
+        return True
 
 
 def print_table(final_list):
@@ -133,24 +136,91 @@ def print_table(final_list):
 
 
 if __name__ == "__main__":
-    game_end = False
-    current_player = 'X'
-    final_list = []
-    for _ in range(3):
-        outer_array = []
+    while True:
+        valid_param = ['user', 'easy', 'medium', 'hard']
+        final_list = []
+        current_player = 'X'
+        # Create playing field
         for _ in range(3):
-            inner_array = []
-            inner_array.append(' ')
-            inner_array.append(False)
-            outer_array.append(inner_array)
-        final_list.append(outer_array)
+            outer_array = []
+            for _ in range(3):
+                inner_array = []
+                inner_array.append(' ')
+                inner_array.append(False)
+                outer_array.append(inner_array)
+            final_list.append(outer_array)
 
-    final_list = final_list[::-1]
+        final_list = final_list[::-1]
+
+        # Input for valid game parameter
+        while True:
+            game_param = input("Input command:")
+            if game_param == 'exit':
+                sys.exit(0)
+            else:
+                game_param = game_param.split()
+                if len(game_param) != 3:
+                    print('Bad parameters!')
+                else:
+                    if game_param[0] != 'start':
+                        print('Bad parameters!')
+                    else:
+                        if game_param[1] not in valid_param or game_param[2] not in valid_param:
+                            print('Bad parameters!')
+                        else:
+                            break
+
+        print_table(final_list)
+        if game_param[1] == game_param[2] == 'user':
+            game_ongoing = True
+            while game_ongoing:
+                enter_coordinates(final_list)
+                print_table(final_list)
+                game_ongoing = game_state(final_list, current_player)
+                current_player = change_player(current_player)
+            print()
+        elif game_param[1] == 'user' and game_param[2] == 'easy':
+            # TODO: user vs computer
+            game_ongoing = True
+            while game_ongoing:
+                enter_coordinates(final_list)
+                print_table(final_list)
+                game_ongoing = game_state(final_list, current_player)
+                if game_ongoing:
+                    current_player = change_player(current_player)
+                    comp_coordinate(final_list, current_player)
+                    print_table(final_list)
+                    game_ongoing = game_state(final_list, current_player)
+                    current_player = change_player(current_player)
+            print()
+        elif game_param[1] == 'easy' and game_param[2] == 'user':
+            # TODO: computer vs user
+            game_ongoing = True
+            while game_ongoing:
+                comp_coordinate(final_list, current_player)
+                print_table(final_list)
+                game_ongoing = game_state(final_list, current_player)
+                if game_ongoing:
+                    current_player = change_player(current_player)
+                    enter_coordinates(final_list)
+                    print_table(final_list)
+                    game_ongoing = game_state(final_list, current_player)
+                    current_player = change_player(current_player)
+            print()
+        else:
+            # TODO: computer vs computer
+            game_ongoing = True
+            while game_ongoing:
+                comp_coordinate(final_list, current_player)
+                print_table(final_list)
+                game_ongoing = game_state(final_list, current_player)
+                current_player = change_player(current_player)
+            print()
 
     # Print the initial table -> start of the games
-    print_table(final_list)
-
-    while not game_end:
+    # print_table(final_list)
+    """
+    while True:
         # Input coordinates
         enter_coordinates(final_list)
 
@@ -168,3 +238,4 @@ if __name__ == "__main__":
 
         # Check game status
         game_state(final_list, current_player)
+    """
